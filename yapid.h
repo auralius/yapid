@@ -13,6 +13,7 @@
 class YAPID
 {
 public:
+  YAPID();
   YAPID(float kp, float ki, float kd, float tau);
   
   void SetGains(float kp, float ki, float kd);
@@ -49,9 +50,10 @@ public:
   float SV();
   float CO();
   
-private:
+  // Time update
   void UpdateTime();
   
+private:
   float kp_;
   float ki_;
   float kd_;

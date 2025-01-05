@@ -15,6 +15,26 @@
 #include <yapid.h>
 
 
+YAPID::YAPID()
+{  
+  kp_ = 0.0;
+  ki_ = 0.0;
+  kd_ = 0.0;
+
+  tau_ = 0.0;
+  
+  past_err_ = 0.0;
+  err_ = 0.0;
+  
+  P_ = 0.0;
+  I_ = 0.0;
+  D_ = 0.0;
+  Df_ = 0.0;
+  
+  tbase_ = micros();
+  tnow_  = 0.0;
+}
+
 YAPID::YAPID(float kp, float ki, float kd, float tau)
 {
   kp_ = kp;
