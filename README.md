@@ -17,6 +17,8 @@ Implemented functions:
   * Also less noisy D-term, D-term is computed from the filtered process values    
   * No more derivative kicks  
     
-* First-order lowpass filter  
+* First-order lowpass filter   
+* <img src="https://github.com/auralius/yapid/blob/main/filter-demo.gif" alt="Alt Text" style="width:70%; height:auto;">
+
 
 **Check [this note](https://github.com/auralius/arduino-pid-template/blob/main/Notes%20on%20PID%20control%20with%20Arduino.pdf) for details on control derivation.**
