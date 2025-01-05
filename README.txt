@@ -16,7 +16,7 @@ Implemented functions:
     * Derivative kicks can happen  
     
 * PID control type-3  
-    * Also less noisy D-term, D-term is computed from the errors (no filter)  
+    * Also less noisy D-term, D-term is computed from the filtered process values    
     * No more derivative kicks  
     
 * First-order-low-pass filter  
