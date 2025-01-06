@@ -1,5 +1,7 @@
 /*
  * Position control of a DC motor, equipped with a quadrature encoder.
+ * Device: Arduino UNO R3
+ *
  * Encoder-A pin goes to pin #3.
  * Encoder-B pin goes to pin #2.
  * The motor driver is the Arduino motor shield rev3.

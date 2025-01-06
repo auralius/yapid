@@ -1,5 +1,6 @@
 /*
  * About the system : https://bit.ly/TemperatureControlDevice
+ * Device: Arduino UNO R3
  *
  * Uno has 3 timers: Timer 0, 1, and 2
  * Timer 0 is reserved by the Arduino for timing purposes.
