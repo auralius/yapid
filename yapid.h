@@ -19,7 +19,7 @@ public:
   void SetGains(float kp, float ki, float kd);
   void SetSamplingTime(float ms);
   void SetOutputLimits(float min, float max);
-  void SetInvertedControlOuput(bool inverted);
+  void Reverse();
   
   unsigned long Now();
   
@@ -79,7 +79,7 @@ private:
   unsigned long tbase_;       
   unsigned long tnow_;       // current time stamp in micro-secs
   unsigned long tprev_;      // previous time stamp in micro-secs
-  float ts_;
+  float ts_ = 1.0;
   
   float past_fofilt_out_;
 };

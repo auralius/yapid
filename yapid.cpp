@@ -120,18 +120,13 @@ float YAPID::CO()
   return co_;
 }
 
-void YAPID::SetInvertedControlOuput(bool inverted)
+void YAPID::Reverse()
 {
-  if (inverted == true)
-    sign_ = -1.0;
-  else
-    sign_ = 1.0;
+  sign_ = -sign_;
 }
 
 float YAPID::Compute1(float sv, float pv)
-{
-  UpdateTime();
-  
+{  
   sv_      = sv;
   
   past_pv_ = pv_;
@@ -146,14 +141,17 @@ float YAPID::Compute1(float sv, float pv)
   
   co_       = P_ + I_ + D_;
   
+  if (co_ > max_)
+    co_ = max_;
+  else if (co_ < min_)
+    co_ = min_;
+  
   return sign_ * co_;
 }
 
 float YAPID::Compute2(float sv, float pv)
 {
-  UpdateTime();
-  
-  sv_      = sv;
+   sv_      = sv;
   
   past_pv_ = pv_;
   pv_      = pv;
@@ -168,13 +166,16 @@ float YAPID::Compute2(float sv, float pv)
   
   co_       = P_ + I_ + Df_;
   
+  if (co_ > max_)
+    co_ = max_;
+  else if (co_ < min_)
+    co_ = min_;
+    
   return sign_ * co_;
 }
 
 float YAPID::Compute3(float sv, float pv)
 {
-  UpdateTime();
-  
   sv_      = sv;
   
   past_pv_ = pv_;
@@ -184,7 +185,7 @@ float YAPID::Compute3(float sv, float pv)
   err_      = sv_ - pv_;
 
   P_        = kp_ * err_;
-  D_        = kd_ * (err_ - past_err_) / ts_;
+  D_        = kd_ * (pv_ - past_pv_) / ts_;
   I_        = I_ + ki_ * ts_ * err_;
   Df_       = (tau_ * Df_ + ts_ * D_) / (tau_ + ts_) ;
   
