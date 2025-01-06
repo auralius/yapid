@@ -4,11 +4,11 @@
  * Uno has 3 timers: Timer 0, 1, and 2
  * Timer 0 is reserved by the Arduino for timing purposes.
  *
- * Heater 1 is using PWM pin #9 
- * Heater 2 is using PWM pin #10
+ * Heater 1 is using PWM pin #9.
+ * Heater 2 is using PWM pin #10.
  * PWM pin #9 and #10 are part of Timer 1.
  *
- * We put our PID in Timer 2.
+ * We put our PID as a peridic task run by Timer 2.
  */
  
 #define TIMER_INTERRUPT_DEBUG         0
@@ -87,17 +87,19 @@ inline void tx()
   Serial.print(pid.CO());
   Serial.print(",");
   Serial.print(pid.PV());
-  Serial.print(",");
-  Serial.print(FO);
   Serial.print("\n"); 
 }
 
 
 void Timer2Handler()
 { 
-  float pv = (float)analogRead(A0) * 500.0 / 1024.0;
+  float pv = (float)analogRead(A0) * 500.0 / 1024.0; // LM35 in A0 (Celcius)
+  
   float co = pid.Compute3(SV, pv);
+  
   analogWrite(pwm1_port, (int)co);
+  
+  pid.UpdateTime();
 }
 
 
