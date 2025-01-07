@@ -22,18 +22,26 @@
 * _First-order lowpass filter_   
   <img src="https://github.com/auralius/yapid/blob/main/filter-demo.gif" alt="Alt Text" style="width:70%; height:auto;">
 
-## How to use
+## How to use the YAPID library
+
+__Abbreviations__:
+
+* ```SV```: set value
+* ```PV```: process value
+* ```CO```: control output
+
+__How to use__:
 
 YAPID measures the elapsed time every iteration and uses the value for the PID control. However, <ins>YAPID does not attempt to control the elapsed time</ins>.
 To guarantee control determinism, it is easier if we put the control in a timer interrupt. All provided examples use timer interrupts.  
 
-To use YAPID library, first, we incluse the header file:
+To use YAPID library, first, we need to include the header file:
 
 ```cpp
 #include "yapid.h"
 ```
 
-Next, we then create a global YAPID object and several global variables:
+Next, we create a global YAPID object and several global variables:
 
 ```cpp
 // Create the PID controller
@@ -45,7 +53,7 @@ float TAU  = 0.1;   // derivative filter time constant
 YAPID pid(KP, KI, KD, TAU);
 ```
 
-Within the Arduino's ```setup()``` function, we define the limits for the control's output. Since we use a timer interrupt, we setup out timer interrupt also in this ```setup()``` function.
+Within the Arduino's ```setup()``` function, we define the limits for the control's output. The default limit is $0.0 \leq \text{CO} < 255.0$. Since we use a timer interrupt, we setup out timer interrupt also in this ```setup()``` function.
 ```cpp
 #define TIMER2_INTERVAL_MS 1  // 1kHz
 
