@@ -14,196 +14,227 @@
 
 #include <yapid.h>
 
-
-YAPID::YAPID()
-{  
-  kp_ = 0.0;
-  ki_ = 0.0;
-  kd_ = 0.0;
-
-  tau_ = 0.0;
-  
-  past_err_ = 0.0;
-  err_ = 0.0;
-  
-  P_ = 0.0;
-  I_ = 0.0;
-  D_ = 0.0;
-  Df_ = 0.0;
-  
-  tbase_ = micros();
-  tnow_  = 0.0;
+YAPID::YAPID(float ts)
+{
+  Ts = ts;
+   
+  tbase    = micros();
+  tnow     = 0;
+  telapsed = 0.0;
 }
 
-YAPID::YAPID(float kp, float ki, float kd, float tau)
+YAPID::YAPID(float ts, float kp, float ki, float kd, float n)
 {
-  kp_ = kp;
-  ki_ = ki;
-  kd_ = kd;
-
-  tau_ = tau;
+  Kp = kp;
+  Ki = ki;
+  Kd = kd;
+  N  = n;
   
-  past_err_ = 0.0;
-  err_ = 0.0;
-  
-  P_ = 0.0;
-  I_ = 0.0;
-  D_ = 0.0;
-  Df_ = 0.0;
-  
-  tbase_ = micros();
-  tnow_  = 0.0;
+  Ts = ts;
+   
+  tbase    = micros();
+  tnow     = 0;
+  telapsed = 0.0;
 }
 
 void YAPID::UpdateTime()
 {
-  tprev_ = tnow_;
-  tnow_  = micros() - tbase_;
-  ts_    = (float)(tnow_ - tprev_) * 1e-6; // in secs
+  tprev    = tnow;
+  tnow     = micros() - tbase;
+  telapsed = (float)(tnow - tprev) * 1e-6; // in secs
 }
 
 void YAPID::SetGains(float kp, float ki, float kd)
 {
-  kp_ = kp;
-  ki_ = ki;
-  kd_ = kd;
+  Kp = kp;
+  Ki = ki;
+  Kd = kd;
 }
 
-void YAPID::SetSamplingTime(float ms)
+void YAPID::SetSamplingTime(float ts)
 {
-  ts_ = ms;
+  Ts = ts;  // must be in seconds
 }
 
-void YAPID::SetOutputLimits(float min, float max)
+void YAPID::SetOutputLimits(float min_val, float max_val)
 {
-  max_ = max;
-  min_ = min;
+  max_co = max_val;
+  min_co = min_val;
 }
 
-float YAPID::Kp()
+float YAPID::Now()
 {
-  return kp_;
-}
-  
-float YAPID::Ki()
-{
-  return ki_;
-}
-
-float YAPID::Kd()
-{
-  return kd_;
-}   
-
-float YAPID::Ts()
-{
-  return ts_;
-}
-
-unsigned long YAPID::Now()
-{
-  return tnow_;
+  return (float)tnow / 1000000.0; // in seconds
 }
 
 float YAPID::PV()
 {
-  return pv_;
+  return pv;
 }
 
 float YAPID::SV()
 {
-  return sv_;
+  return sv;
 }
 
 float YAPID::CO()
 {
-  return co_;
+  return co;
+}
+
+float YAPID::SAT_CO()
+{
+  return sat_co;
+}
+
+float YAPID::TS()
+{
+  return Ts;
+}
+
+float YAPID::TE()
+{
+  return telapsed;
+}
+
+float YAPID::P()
+{
+  return P0;
+}
+
+float YAPID::I()
+{
+  return I0;
+}
+
+float YAPID::D()
+{
+  return D0;
 }
 
 void YAPID::Reverse()
 {
-  sign_ = -sign_;
+  sign = -sign;
 }
 
-float YAPID::Compute1(float sv, float pv)
+float YAPID::Compute0(float set_value, float process_value)
 {  
-  sv_      = sv;
+  sv = set_value;
+  pv = process_value;
   
-  past_pv_ = pv_;
-  pv_      = pv;
+  e1 = e0;
+  e0 = sv - pv;
   
-  past_err_ = err_;
-  err_      = sv_ - pv_;
+  co = sv;
   
-  P_        = kp_ * err_;
-  D_        = kd_ * (err_ - past_err_) / ts_;
-  I_        = I_ + ki_ * ts_ * err_;
-  
-  co_       = P_ + I_ + D_;
-  
-  if (co_ > max_)
-    co_ = max_;
-  else if (co_ < min_)
-    co_ = min_;
-  
-  return sign_ * co_;
-}
-
-float YAPID::Compute2(float sv, float pv)
-{
-   sv_      = sv;
-  
-  past_pv_ = pv_;
-  pv_      = pv;
-  
-  past_err_ = err_;
-  err_      = sv_ - pv_;
-  
-  P_        = kp_ * err_;
-  D_        = kd_ * (err_ - past_err_) / ts_;
-  I_        = I_ + ki_ * ts_ * err_;
-  Df_       = (tau_ * Df_ + ts_ * D_) / (tau_ + ts_) ;
-  
-  co_       = P_ + I_ + Df_;
-  
-  if (co_ > max_)
-    co_ = max_;
-  else if (co_ < min_)
-    co_ = min_;
+  if (co > max_co)
+    sat_co = max_co;
+  else if (co < min_co) 
+    sat_co = min_co;
+  else
+    sat_co = co;
     
-  return sign_ * co_;
+  return sign * sat_co;
 }
 
-float YAPID::Compute3(float sv, float pv)
-{
-  sv_      = sv;
+float YAPID::Compute1(float set_value, float process_value)
+{  
+  sv = set_value;
+  pv = process_value;
   
-  past_pv_ = pv_;
-  pv_      = pv;
+  e1 = e0;
+  e0 = sv - pv;
   
-  past_err_ = err_;
-  err_      = sv_ - pv_;
-
-  P_        = kp_ * err_;
-  D_        = kd_ * (pv_ - past_pv_) / ts_;
-  I_        = I_ + ki_ * ts_ * err_;
-  Df_       = (tau_ * Df_ + ts_ * D_) / (tau_ + ts_) ;
+  I1 = I0;
+  D1 = D0;
   
-  co_       = P_ + I_ + Df_;
+  P0 = Kp * e0;
   
-  if (co_ > max_)
-    co_ = max_;
-  else if (co_ < min_)
-    co_ = min_;
+  I0 = Ki * (e0 + e1) * Ts/2 + I1;
+  D0 = ( 2*Kd*N * (e0-e1) / Ts - D1 * (N-2/Ts) ) / (N + 2/Ts);
   
-  return sign_ * co_;
+  co = P0 + I0 + D0;
+  
+  if (co > max_co){
+    sat_co = max_co;
+    I0 = 0.0; // Stop the integral
+  }
+  else if (co < min_co) {
+    sat_co = min_co;
+    I0 = 0.0; // Stop the integral
+  }
+  else
+    sat_co = co;
+    
+  return sign * sat_co;
 }
 
-float YAPID::FirstOrderFilter(float fofilt_tau, float fofilt_in)
-{
-  float fofilt_out = (fofilt_tau * past_fofilt_out_ + ts_ * fofilt_in) / 
-                     (fofilt_tau + ts_) ;
-  past_fofilt_out_ = fofilt_out;
+float YAPID::Compute2(float set_value, float process_value)
+{  
+  sv = set_value;
+  pv = process_value;
   
-  return fofilt_out;
+  e1 = e0;
+  e0 = -pv;
+  
+  I1 = I0;
+  D1 = D0;
+  
+  P0 = Kp * e0;
+  I0 = Ki * (e0 + e1) * Ts/2 + I1;
+  D0 = ( 2*Kd*N * (e0-e1) / Ts - D1 * (N-2/Ts) ) / (N + 2/Ts);
+  
+  co = P0 + I0 + D0;
+  
+  if (co > max_co){
+    sat_co = max_co;
+    I0 = 0.0; // Stop the integral
+  }
+  else if (co < min_co) {
+    sat_co = min_co;
+    I0 = 0.0; // Stop the integral
+  }
+  else
+    sat_co = co;
+    
+  return sign * sat_co;
+}
+
+
+float YAPID::FOLP(float tau, float in)
+{
+  x1 = x0;
+  x0 = in;
+  y1 = y0;
+  y0 = (x0 + x1 - y1*(1-2*tau/Ts)) / (1+2*tau/Ts);
+  return y0;
+}
+  
+float YAPID::SOLP(float wc, float in)
+{
+  x2 = x1;
+  x1 = x0;
+  x0 = in;
+  y2 = y1;
+  y1 = y0;
+  
+  float sq22  = 2*sqrt(2);
+  float Tswc  = Ts * wc;
+  float Tswc2 = Tswc * Tswc;
+  float A = 1 + sq22/Tswc + 4/Tswc2;
+  float B = 2 - 8/Tswc2;  
+  float C = 1 - sq22/Tswc + 4/Tswc2;
+
+  y0 = (x0 + 2*x1 + x2 - y1*B - y2*C ) / A;
+  return y0;
+ }
+
+float YAPID::X()
+{
+  return x0;
+}
+
+float YAPID::Y()
+{
+  return y0;
 }

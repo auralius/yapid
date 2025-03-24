@@ -8,80 +8,155 @@
  
 #ifndef YAPID_h
 #define YAPID_h
-#define LIBRARY_VERSION	0.0.1
+#define LIBRARY_VERSION 0.0.2
 
 class YAPID
 {
 public:
-  YAPID();
-  YAPID(float kp, float ki, float kd, float tau);
+  /** 
+   * The constructor.
+   * @param ts Sampling period (in seconds)
+   */
+  YAPID(float ts);
   
+  /** 
+   * The constructor.
+   * @param ts Sampling period (in seconds)
+   * @param kp P-gain
+   * @param ki I-gain
+   * @param kd D-gain
+   * @param n  Derivative filter coefficient 
+   */
+  YAPID(float ts, float kp, float ki, float kd, float n);
+  
+  /**
+   * Set the PID gains.
+   * @param kp P-gain
+   * @param ki I-gain
+   * @param kd D-gain
+   */
   void SetGains(float kp, float ki, float kd);
-  void SetSamplingTime(float ms);
-  void SetOutputLimits(float min, float max);
+  
+  /**
+   * Set the sampling period.
+   * @param ts Sampling period in seconds
+   */
+  void SetSamplingTime(float ts);
+  
+  /**
+   * Set the saturation values of the control output.
+   * @param min_val Lower-limit value 
+   * @param max_val Upper-limit value
+   */
+  void SetOutputLimits(float min_val, float max_val);
+  
+  //! Multiply the output with -1.
   void Reverse();
   
-  unsigned long Now();
-  
-  float Kp();
-  float Ki();
-  float Kd();
-  float Ts();
-
-  // Type-1 PID control
-  // D-term is computed from the errors (no filter)
-  // Noisy D-term
-  float Compute1(float sv, float pv);
-  
-  // Type-2 PID control
-  // Less noisy D-term, D-term is computed from the filtered errors
-  // Derivative kicks can happen
-  float Compute2(float sv, float pv);
-  
-  // Type-3 PID control
-  // Less noisy D-term, D-term is computed from the filtered process values
-  // No more derivative kicks
-  float Compute3(float sv, float pv);
-  
-  // First-order filter
-  float FirstOrderFilter(float fofilt_tau, float fofilt_in);
-  
+  //! Get current process value.
   float PV();
-  float SV();
-  float CO();
   
-  // Time update
+  //! Get current set value
+  float SV();
+  
+  //! Get current output value.
+  float CO();
+
+  //! Get current saturated output value.
+  float SAT_CO();
+    
+  //! Get defined sampling rate (in seconds).
+  float TS();
+  
+  //! Get current actual elapsed time (in seconds).
+  float TE();
+  
+  //! Get current P control output.
+  float P();
+  
+  //! Get current I control output.
+  float I();
+  
+  //! Get current D control output.
+  float D();
+   
+  //! Get current time (in micro-seconds).
+  float Now();
+  
+  //! Update the time once.
   void UpdateTime();
+
+  //! Run the PID once.
+  /*! Simply send the input as the control ouput (no feedback system!)*/
+  float Compute0(float set_value, float process_value);
+    
+  //! Run the PID once.
+  /*! D-term uses the error signal */
+  float Compute1(float set_value, float process_value);
+  
+  //! Run the PID once.
+  /*! D-term uses the prcess-value signal */
+  float Compute2(float set_value, float process_value);
+  
+  /**
+   * First-order low-pass filter.
+   * @param tau Filter time constant
+   * @param in Input signal to filter
+   */
+  float FOLP(float tau, float in);
+  
+  /**
+   * Second-order low-pass filter.
+   * @param wc Filter cut-off frequency
+   * @param in Input signal to filter
+   */  
+   float SOLP(float wc, float in);
+  
+  //! Return filter current input
+  float X();
+  
+  //! Returns filter current output
+  float Y();
+  
   
 private:
-  float kp_;
-  float ki_;
-  float kd_;
-  float tau_;
+  float P0; //!< P(k) 
+  float I0; //!< I(k) 
+  float I1; //!< I(k-1)
+  float D0; //!< D(k) 
+  float D1; //!< D(k-1)
   
-  float pv_;
-  float sv_;
-  float co_;
-  float past_pv_;
+  float Kp; //!< P-gain
+  float Ki; //!< I-gain
+  float Kd; //!< D-gain
+  float N;  //!< Derivative filter coefficient
+
+  float pv;     //!< process value
+  float sv;     //!< set value
+  float co;     //!< control output
+  float sat_co; //!< control output after the saturator
   
-  float sign_ = 1.0;
+  float sign = 1.0;    //!< for inverting the output if needed
   
-  float max_ = 255.0;
-  float min_ = 0.0;
+  float max_co = 255.0; //!< control output upper limit
+  float min_co = 0.0;   //!< control output lower limit
   
-  float past_err_;  // previous error
-  float err_;       // current error
-  float P_;         // proportional term
-  float I_;         // integral term
-  float D_;         // derivative term
-  float Df_;        // filtered derivative term
+  float e0 = 0.0;       //!< e(k)
+  float e1 = 0.0;       //!< e(k-1)
+
+  float x0 = 0.0;       //!< x(k)
+  float x1 = 0.0;       //!< x(k-1)
+  float x2 = 0.0;       //!< x(k-2)
+  float y0 = 0.0;       //!< y(k)
+  float y1 = 0.0;       //!< y(k-1)
+  float y2 = 0.0;       //!< y(k-2)
   
-  unsigned long tbase_;       
-  unsigned long tnow_;       // current time stamp in micro-secs
-  unsigned long tprev_;      // previous time stamp in micro-secs
-  float ts_ = 1.0;
+  unsigned long tbase;       
+  unsigned long tnow;   //!< current time stamp in micro-seconds
+  unsigned long tprev;  //!< previous time stamp in micro-seconds
   
-  float past_fofilt_out_;
+  float telapsed = 0.0; //!< elapsed time in micro-seconds
+  float Ts       = 1.0; //!< sampling period in seconds
 };
 
 #endif
