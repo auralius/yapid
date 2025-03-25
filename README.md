@@ -3,37 +3,46 @@
 * Auralius Manurung, Universitas Telkom  
 * <auralius.manurung@ieee.org>   
 ```
-**Check [this note](https://github.com/auralius/arduino-pid-template/blob/main/Notes%20on%20PID%20control%20with%20Arduino.pdf) for details on the control derivation.**
+The discrete implementation uses bilinear transformation (Tustin or trapezoidal) method. **Check [this page](https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html) for details on the control derivation.**
 
 
 ## Implemented functions: 
 
-* _PID control type-1_  
-  * Noisy D-term, D-term is computed from the errors (no filter)
+* `float YAPID::Compute0(float set_value, float process_value)`
+  * This simply sends `set_value` as control output.
+  * There is no feedback control happening here.
+  * This function is useful to testing system's open-loop respose.
     
-* _PID control type-2_  
-  * Less noisy D-term, D-term is computed from the filtered errors  
-  * Derivative kicks can happen  
+* `float YAPID::Compute1(float set_value, float process_value)`
+  * D-term is computed from the filtered errors.  
+  * Derivative kicks will happen
+  * Simple integral windup prevention with clamping technique 
     
-* _PID control type-3_  
-  * Also less noisy D-term, D-term is computed from the filtered process values    
-  * No more derivative kicks  
+* `float YAPID::Compute2(float set_value, float process_value)`
+  * D-term is computed from the filtered process values    
+  * No more derivative kicks
+  * Simple integral windup prevention with clamping technique 
     
-* _First-order lowpass filter_   
-  <img src="https://github.com/auralius/yapid/blob/main/filter-demo.gif" alt="Alt Text" style="width:70%; height:auto;">
+* `float YAPID::FOLP(float tau, float in)`
+  * First-order low-pass filter (time-constant filter)
+    
+* `float YAPID::FOLP(float tau, float in)`
+  * First-order low-pass filter (time-constant filter)
+ 
+* `float YAPID::SOLP(float tau, float in)`
+  * Second-order low-pass filter (Butterworth filter)
 
 ## How to use the YAPID library
 
 __Abbreviations__:
 
-* ```SV```: set value
-* ```PV```: process value
-* ```CO```: control output
+* ```sv```: set value
+* ```pv```: process value
+* ```co```: control output
 
 __How to use__:
 
-YAPID measures the elapsed time every iteration and uses the value for the PID control. However, <ins>YAPID does not attempt to control the elapsed time</ins>.
-To guarantee control determinism, it is easier if we put the control in a timer interrupt. All provided examples use timer interrupts.  
+YAPID **DOES NOT** measure the elapsed time every iteration. It simply uses the provided value durind the setup. Therefore, to guarantee control determinism, it is easier if we put the control in a timer interrupt. All provided examples use timer interrupts.  
 
 To use YAPID library, first, we need to include the header file:
 
@@ -45,12 +54,12 @@ Next, we create a global YAPID object and several global variables:
 
 ```cpp
 // Create the PID controller
-float KP   = 200.0; // kp
-float KD   = 0.1;   // kd
-float KI   = 0.1;   // ki
-float SV   = 0.0;   // set value
-float TAU  = 0.1;   // derivative filter time constant
-YAPID pid(KP, KI, KD, TAU);
+float kp = 100.;  // kp
+float ki = 10.0;  // ki
+float kd = 1.0;   // kd
+float N  = 1.0;   // derivative filter coefficient (Hz)
+float Ts = 1e-3;
+YAPID pid(Ts, kp, ki, kd, N);
 ```
 
 Within the Arduino's ```setup()``` function, we define the limits for the control's output. The default limit is $0.0 \leq \text{CO} < 255.0$. Since we use a timer interrupt, we setup out timer interrupt also in this ```setup()``` function.
@@ -59,11 +68,10 @@ Within the Arduino's ```setup()``` function, we define the limits for the contro
 
 void setup()
 {
-  // Setup the timer interrupt (we use UNO, timer-2, and
+  // Setup the timer interrupt (we use NANO, timer-1, and
   // https://github.com/khoih-prog/TimerInterrupt)
-  ITimer2.init();
-  ITimer2.attachInterruptInterval(TIMER2_INTERVAL_MS,
-                                  Timer2Handler);
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, Timer1Handler);
 
   // Define the control output limits
   // Here, the output becomes PWM signals (0 to 255)
@@ -77,17 +85,17 @@ void setup()
 Finally, in the timer interrupt function handler, we can put our PID control. The steps are: 
 * read the sensor (```pv```)
 * compute the PID (```co```)
-* send the output out
+* apply the output to the actuator/plant
 * measure the elapsed time
 
 ```cpp
-void Timer2Handler()
+void Timer1Handler()
 { 
-  float pv = (float)analogRead(A0) * 500.0 / 1024.0; // LM35 in A0 (Celcius)
+  float pv = (float)analogRead(A0) * 5.0 / 1024.0;
+
+  float co = pid.Compute1(SV, pv);
   
-  float co = pid.Compute3(SV, pv);
-  
-  analogWrite(pwm1_port, (int)co);
+  analogWrite(pwm_port, (int)co);
   
   pid.UpdateTime();
 }
