@@ -25,9 +25,6 @@ The discrete implementation uses bilinear transformation (Tustin or trapezoidal)
     
 * `float YAPID::FOLP(float tau, float in)`
   * First-order low-pass filter (time-constant filter)
-    
-* `float YAPID::FOLP(float tau, float in)`
-  * First-order low-pass filter (time-constant filter)
  
 * `float YAPID::SOLP(float tau, float in)`
   * Second-order low-pass filter (Butterworth filter)
