@@ -1,5 +1,5 @@
 /**
- * A simple serial RC system with R = 10kΩ and C = 100uF
+ * A simple serial RC system with R = 20kΩ and C = 100uF
  * PWM signal from D3 (Timer-2) is applied to the RC system.
  * Voltage across the capacitor is measured by A0.
  */
@@ -17,9 +17,9 @@ const int pwm_port = 3;  // TIMER-2
 
 // Create the PID controller
 float kp = 100.;  // kp
-float ki = 10.0;  // ki
-float kd = 1.0;   // kd
-float N  = 1.0;   // derivative filter constant (Hz)
+float ki = 100.0;  // ki
+float kd = 10.0;   // kd
+float N  = 100.0;   // derivative filter constant (Hz)
 float Ts = 1e-3;
 YAPID pid(Ts, kp, ki, kd, N);
 
@@ -34,7 +34,7 @@ void setup() {
   analogWrite(pwm_port, 0);     
 
   pid.SetOutputLimits(0., 255.)  ;
-  Serial.begin(250000);
+  Serial.begin(1000000);
 }
 
 
@@ -86,4 +86,13 @@ void loop()
   
   // Serial transmit
   tx();
+  
+  /*
+  if (pid.Now() < 15.0)
+    SV = 0.0;
+  else if ((pid.Now() > 15.0) && (pid.Now() < 30.0)) 
+    SV = 4.0;
+  else if (pid.Now() > 30.0) 
+    SV = 1.0;
+  */
 }
