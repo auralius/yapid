@@ -148,20 +148,20 @@ float YAPID::Compute1(float set_value, float process_value)
   I1 = I0;
   D1 = D0;
   
+  float I0_ = Ki * (e0 + e1) * Ts/2;
   P0 = Kp * e0;
-  
-  I0 = Ki * (e0 + e1) * Ts/2 + I1;
+  I0 =  I0_ + I1;
   D0 = ( 2*Kd*N * (e0-e1) / Ts - D1 * (N-2/Ts) ) / (N + 2/Ts);
   
   co = P0 + I0 + D0;
   
   if (co > max_co){
     sat_co = max_co;
-    I0 = 0.0; // Stop the integral
+    I0 = I0 - I0_; // Stop the integral
   }
   else if (co < min_co) {
     sat_co = min_co;
-    I0 = 0.0; // Stop the integral
+    I0 = I0 - I0_; // Stop the integral
   }
   else
     sat_co = co;
@@ -180,19 +180,20 @@ float YAPID::Compute2(float set_value, float process_value)
   I1 = I0;
   D1 = D0;
   
+  float I0_ = Ki * (e0 + e1) * Ts/2;
   P0 = Kp * e0;
-  I0 = Ki * (e0 + e1) * Ts/2 + I1;
+  I0 = I0_ + I1;
   D0 = ( 2*Kd*N * (e0-e1) / Ts - D1 * (N-2/Ts) ) / (N + 2/Ts);
   
   co = P0 + I0 + D0;
   
   if (co > max_co){
     sat_co = max_co;
-    I0 = 0.0; // Stop the integral
+    I0 = I0 - I0_; // Stop the integral
   }
   else if (co < min_co) {
     sat_co = min_co;
-    I0 = 0.0; // Stop the integral
+    I0 = I0 - I0_; // Stop the integral
   }
   else
     sat_co = co;
