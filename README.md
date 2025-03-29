@@ -97,3 +97,8 @@ void Timer1Handler()
   pid.UpdateTime();
 }
 ```
+
+## Comparison with MATLAB Simulink
+
+![](https://github.com/auralius/yapid/blob/main/compare_matlab.png)
+
