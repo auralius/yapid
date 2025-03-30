@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>YAPID (Yet Another PID Library for Arduino)</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "YAPID (Yet Another PID Library for Arduino)";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> YAPID (Yet Another PID Library for Arduino)
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href=".">YAPID (Yet Another PID Library for Arduino)</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#about-yapid">About YAPID</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#control-algorithm-derivations">Control algorithm derivations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-to-use-yapid">How to use YAPID</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#examples-with-comparisons-to-matlab-simulink">Examples with comparisons to MATLAB Simulink</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#rc-system">RC-system</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dc-motor-position-control-with-potentiometer">DC-motor position control (with potentiometer)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#heater-control">Heater control</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">YAPID (Yet Another PID Library for Arduino)</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">YAPID (Yet Another PID Library for Arduino)</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="yapid-yet-another-pid-library-for-arduino">YAPID (Yet Another PID Library for Arduino)</h1>
+<hr />
+<h2 id="about-yapid">About YAPID</h2>
+<p>YAPID is another PID library for Arduino, In YAPID, we emphasize more accurate implementations through detailed discretization techniques and result comparisons against <em>MATLAB Simulink</em>. </p>
+<p>Details on the PID implementation are as follows:</p>
+<ul>
+<li>Bilinear transform (trapezoidal or Tustin) method for the discretization technique</li>
+<li>A derivative filter for the derivative term of the PID control</li>
+<li>Simple integral windup prevention method with clamping technique</li>
+</ul>
+<p>Besides PID, YAPID also has two low-pass filter implementations:</p>
+<ul>
+<li>1st order (time constant) low-pass filter</li>
+<li>2nd order (Butterworth) low-pass filter</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>Author(s) information:</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auralius Manurung - Universitas Telkom, Bandung  <br>✉ auralius.manurung@ieee.org</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="control-algorithm-derivations">Control algorithm derivations</h2>
+<p>YAPID uses bilinear transform to discretize both the PID and the filter transfer functions. Additionally, YAPID also has a clamping method implemented to prevent the integrator windup. </p>
+<p><img alt="" src="im2.png" /></p>
+<p>Mathematical details can be found in the following links:  </p>
+<ul>
+<li><a href="https://auralius.github.io/control-systems-with-sympy/digital-pid-1.html">Digital PID Control - Part 1</a>  </li>
+<li><a href="https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html">Digital PID Control - Part 2</a></li>
+<li><a href="https://auralius.github.io/control-systems-with-sympy/digital-filter.html">Digital Low-Pass Filter</a></li>
+</ul>
+<hr />
+<h2 id="how-to-use-yapid">How to use YAPID</h2>
+<p>These are  the main functions that we can use:</p>
+<ul>
+<li>
+<p><code>float YAPID::Compute0(float set_value, float process_value)</code></p>
+<ul>
+<li>This simply sends <code>set_value</code> as control output.</li>
+<li>There is no feedback control happening here.</li>
+<li>This function is useful to testing system's open-loop respose.</li>
+</ul>
+</li>
+<li>
+<p><code>float YAPID::Compute1(float set_value, float process_value)</code></p>
+<ul>
+<li>D-term is computed from the filtered errors.  </li>
+<li><strong>With derivative kicks.</strong></li>
+<li>Simple integral windup prevention with clamping technique. </li>
+</ul>
+</li>
+<li>
+<p><code>float YAPID::Compute2(float set_value, float process_value)</code></p>
+<ul>
+<li>D-term is computed from the filtered process values.</li>
+<li><strong>No derivative kicks.</strong></li>
+<li>Simple integral windup prevention with clamping technique .</li>
+</ul>
+</li>
+<li>
+<p><code>float YAPID::FOLP(float tau, float in)</code></p>
+<ul>
+<li>First-order low-pass filter (time-constant filter).</li>
+</ul>
+</li>
+<li>
+<p><code>float YAPID::SOLP(float tau, float in)</code></p>
+<ul>
+<li>Second-order low-pass filter (Butterworth filter).</li>
+</ul>
+</li>
+</ul>
+<p>YAPID <strong>DOES NOT</strong> measure the elapsed time every iteration. It simply uses the provided sampling time during the setup. Therefore, to guarantee control determinism, it is easier if we use a timer interrupt handler to run the control periodically. All provided examples use timer interrupts.  </p>
+<p>To use YAPID library, first, we need to include the header file:</p>
+<pre><code class="language-cpp">#include &quot;yapid.h&quot;
+</code></pre>
+<p>Next, we create a global YAPID object and several global variables:</p>
+<pre><code class="language-cpp">// Create the PID controller
+float kp = 100.;  // kp
+float ki = 10.0;  // ki
+float kd = 1.0;   // kd
+float N  = 1.0;   // derivative filter coefficient (Hz)
+float Ts = 1e-3;
+YAPID pid(Ts, kp, ki, kd, N);
+</code></pre>
+<p>Within the Arduino's <code>setup()</code> function, we define the limits for the control's output. The default limit is <script type="math/tex">0.0 \leq \text{CO} < 255.0</script>. Since we use a timer interrupt, we setup out timer interrupt also in this <code>setup()</code> function.</p>
+<pre><code class="language-cpp">#define TIMER2_INTERVAL_MS 1  // 1kHz
+
+void setup()
+{
+  // Setup the timer interrupt (we use NANO, timer-1, and
+  // https://github.com/khoih-prog/TimerInterrupt)
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, Timer1Handler);
+
+  // Define the control output limits
+  // Here, the output becomes PWM signals (0 to 255)
+  pid.SetOutputLimits(0., 255)
+
+  // ...
+  // ...
+}
+</code></pre>
+<p>Finally, in the timer interrupt function handler, we can put our PID control. The steps are: 
+* read the sensor (<code>pv</code>)
+* compute the PID (<code>co</code>)
+* apply the output to the actuator/plant
+* measure the elapsed time</p>
+<pre><code class="language-cpp">void Timer1Handler()
+{ 
+  float pv = (float)analogRead(A0) * 5.0 / 1024.0;
+
+  float co = pid.Compute1(SV, pv);
+
+  analogWrite(pwm_port, (int)co);
+
+  pid.UpdateTime();
+}
+</code></pre>
+<hr />
+<h2 id="examples-with-comparisons-to-matlab-simulink">Examples with comparisons to MATLAB Simulink</h2>
+<h3 id="rc-system">RC-system</h3>
+<p>Here, our task is to use YAPID to control <script type="math/tex">v_c(t)</script> by modulating <script type="math/tex">v_i(t)</script>.
+<img alt="" src="im1.png" /></p>
+<p>The following code listing is the Arduino Nano's implementation where we set <script type="math/tex">K_p=100</script>, <script type="math/tex">K_i=100</script>, <script type="math/tex">K_d=10</script>, and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1 ms or 1kHz) by Timer-1.</p>
+<pre><code class="language-cpp">#define TIMER_INTERRUPT_DEBUG         0
+#define _TIMERINTERRUPT_LOGLEVEL_     0
+#define USE_TIMER_1                   true 
+
+#include &quot;TimerInterrupt.h&quot;
+#include &quot;yapid.h&quot;
+
+#define TIMER1_INTERVAL_MS             1
+
+const int pwm_port = 3;  // TIMER-2   
+
+// Create the PID controller
+float kp = 100.;  // kp
+float ki = 100.0; // ki
+float kd = 10.0;  // kd
+float N  = 100.0; // derivative filter constant (Hz)
+float Ts = 1e-3;
+YAPID pid(Ts, kp, ki, kd, N);
+
+volatile float SV = 0.0;  // set value
+
+//------------------------------------------------------------------
+void setup() {
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, Timer1Handler);
+
+  pinMode(pwm_port, OUTPUT);  
+  analogWrite(pwm_port, 0);     
+
+  pid.SetOutputLimits(0., 255.)  ;
+  Serial.begin(1000000);
+}
+
+void rx()
+{
+  while(Serial.available()){
+    int StringCount = 0;
+    String input = Serial.readString();
+    SV = input.toFloat();
+  }
+}
+
+inline void tx()
+{
+  Serial.print(pid.Now(), 3);
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.SV());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.PV());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.P());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.I());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.D());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.CO());
+  Serial.print(&quot;,&quot;);
+  Serial.print(pid.SAT_CO());
+  Serial.print(&quot;\n&quot;);
+}
+
+void Timer1Handler()
+{ 
+  float pv = (float)analogRead(A0) * 5.0 / 1024.0;
+  float co = pid.Compute1(SV, pv);
+  analogWrite(pwm_port, (int)co);
+  pid.UpdateTime();
+}
+
+void loop()
+{
+  // Serial receive
+  rx();
+  // Serial transmit
+  tx();
+
+  if (pid.Now() &lt; 15.0)
+    SV = 0.0;
+  else if ((pid.Now() &gt; 15.0) &amp;&amp; (pid.Now() &lt; 30.0)) 
+    SV = 4.0;
+  else if (pid.Now() &gt; 30.0) 
+    SV = 1.0;
+}
+</code></pre>
+<p>The next figure shows similar implementation in MATLAB Simulink with identical control parameters. For this, we use the <a href="https://www.mathworks.com/help/simulink/supportpkg/arduino_ref/getting-started-with-arduino-hardware.html">Simulink® Support Package for Arduino®</a>. The Simulink file can be downloaded <a href="rc_pid_nano.slx">here</a> (R2024b)</p>
+<p><img alt="" src="im3.png" /></p>
+<p>Finally, the results are shown in the following plots.
+<img alt="" src="im4.png" /></p>
+<p>As shown by the plots, YAPID gives results that is very close to MATLAB Simulink.</p>
+<h3 id="dc-motor-position-control-with-potentiometer">DC-motor position control (with potentiometer)</h3>
+<h3 id="dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</h3>
+<h3 id="heater-control">Heater control</h3>
+              
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.5.3
+Build Date UTC : 2025-03-30 08:38:14.828512+00:00
+-->
