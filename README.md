@@ -36,10 +36,18 @@ __Abbreviations__:
 * ```sv```: set value
 * ```pv```: process value
 * ```co```: control output
+* ```P```: P-term control output
+* ```I```: I-term control output
+* ```D```: D-term control output
+* ```Kp```: proportinal gain
+* ```Ki```: integral gian
+* ```Kd```: derivative gain
+* ```N```: derivative filter coefficient
+
 
 __How to use__:
 
-YAPID **DOES NOT** measure the elapsed time every iteration. It simply uses the provided value durind the setup. Therefore, to guarantee control determinism, it is easier if we put the control in a timer interrupt. All provided examples use timer interrupts.  
+YAPID **DOES NOT** measure the elapsed time every iteration. It simply uses the provided sampling time during the setup. Therefore, to guarantee control determinism, it is easier if we use a timer interrupt handler to run the control periodically. All provided examples use timer interrupts.   
 
 To use YAPID library, first, we need to include the header file:
 
