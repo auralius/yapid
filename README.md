@@ -1,9 +1,14 @@
 # Yet Another PID (YAPID) library for Arduino   
-```
-* Auralius Manurung, Universitas Telkom  
-* <auralius.manurung@ieee.org>   
-```
-The discrete implementation uses bilinear transformation (Tustin or trapezoidal) method. **Check [this page](https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html) for details on the control derivation.**
+
+Contact:
+Auralius Manurung, Universitas Telkom, <auralius.manurung@ieee.org>   
+
+Detailed documentations:
+https://auralius.github.io/yapid/
+
+---
+
+In YAPID, the discrete implementations of both the control and the filter use bilinear transformation (Tustin or trapezoidal) method. **Check [this page](https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html) for details on the control derivation.**
 
 
 ## Implemented functions: 
