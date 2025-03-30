@@ -1,0 +1,40 @@
+#######################################
+# Syntax Coloring Map
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+YAPID	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+SetGains	    KEYWORD2
+SetSamplingTime	KEYWORD2
+SetOutputLimits	KEYWORD2
+Reverse	        KEYWORD2
+PV	            KEYWORD2
+SV	            KEYWORD2
+CO	            KEYWORD2
+SAT_CO      	KEYWORD2
+TS	            KEYWORD2
+P	            KEYWORD2
+I	            KEYWORD2
+D             	KEYWORD2
+X	            KEYWORD2
+Y	            KEYWORD2
+NOW	            KEYWORD2
+UpdateTime      KEYWORD2
+Compute0	    KEYWORD2
+Compute1        KEYWORD2
+Compute2	    KEYWORD2
+FOLP            KEYWORD2
+SOLP	        KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
