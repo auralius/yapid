@@ -216,7 +216,7 @@ void setup()
 <h3 id="rc-system">RC-system</h3>
 <p>Here, our task is to use YAPID to control <script type="math/tex">v_c(t)</script> by modulating <script type="math/tex">v_i(t)</script>.
 <img alt="" src="im1.png" /></p>
-<p>The following code listing is the Arduino Nano's implementation where we set <script type="math/tex">K_p=100</script>, <script type="math/tex">K_i=100</script>, <script type="math/tex">K_d=10</script>, and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1 ms or 1kHz) by Timer-1.</p>
+<p>The following code listing is the Arduino Nano's implementation where we set <script type="math/tex">K_p=100</script>, <script type="math/tex">K_i=100</script>, <script type="math/tex">K_d=10</script> and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1 ms or 1kHz) by Timer-1.</p>
 <pre><code class="language-cpp">#define TIMER_INTERRUPT_DEBUG         0
 #define _TIMERINTERRUPT_LOGLEVEL_     0
 #define USE_TIMER_1                   true 
@@ -302,26 +302,26 @@ void loop()
     SV = 1.0;
 }
 </code></pre>
-<p>The next figure shows similar implementation in MATLAB Simulink with identical control parameters. For this, we use the <a href="https://www.mathworks.com/help/simulink/supportpkg/arduino_ref/getting-started-with-arduino-hardware.html">Simulink® Support Package for Arduino®</a>. The Simulink file can be downloaded <a href="rc_pid_nano.slx">here</a> (R2024b).</p>
+<p>The next figure shows similar implementation in MATLAB Simulink with identical control parameters and sampling rate. For this, we use the <a href="https://www.mathworks.com/help/simulink/supportpkg/arduino_ref/getting-started-with-arduino-hardware.html">Simulink® Support Package for Arduino®</a>. The Simulink file can be downloaded <a href="rc_pid_nano.slx">here</a> (R2024b).</p>
 <p><img alt="" src="im3.png" /></p>
 <p>Finally, the results are shown in the following plots.
 <img alt="" src="im4.png" /></p>
-<p>As shown by the plots, YAPID gives results that is very close to MATLAB Simulink.</p>
+<p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
 <h3 id="dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</h3>
-<p>The left figure is the cheap N20 DC motor that comes with a quadrature encoder. The right figure shows the overall system with Arduino Uno and Arduino Motor Shield rev. 3.</p>
+<p>The first picture below is the cheap N20 DC motor (<a href="https://tokopedia.link/EZlFg2RIbSb">purchase link</a>) that comes with a magnetic quadrature encoder that generate 7 pulses per rotation. As for the second picture below, it shows the overall system with an Arduino Uno and an <a href="https://www.arduino.cc/en/uploads/Main/arduino_MotorShield_Rev3-schematic.pdf">Arduino Motor Shield rev. 3</a>.</p>
 <p><img alt="150" src="im6.png" style="height:150px" />
 <img alt="300" src="im5.png" style="height:300px" /></p>
-<p>The following code listing is the Arduino Nano's implementation where we set <script type="math/tex">K_p=10</script>, <script type="math/tex">K_i=4</script>, <script type="math/tex">K_d=0.01</script>, and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1 ms or 1kHz) in the Arduino's <code>loop()</code> function. </p>
+<p>The following code listing is the Arduino Uno's implementation where we set <script type="math/tex">K_p=10</script>, <script type="math/tex">K_i=4</script>, <script type="math/tex">K_d=0.01</script>, and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1000 us or 1kHz) in the Arduino's <code>loop()</code> function. </p>
 <pre><code class="language-cpp">/**
- * N20 DC motor with rotary encoder. 
- * The encoder generates 7 pulses per rotation.
- * The encoder is set to x1 mode, thus, only channel A will trigger
- * the external interrupt. Motor gear ratio is 210:1.
+ * N20 DC-motor with rotary encoder. 
+ * The quadrature encoder generates 7 pulses per rotation.
+ * The encoder readings will be set to x1 mode, thus, only channel A 
+ * will trigger the external interrupt. Motor gear ratio is 210:1.
  */
 
 #include &quot;yapid.h&quot;
 
-#define PID_LOOP_INTERVAL_US             1000
+#define PID_LOOP_INTERVAL_US    1000
 
 // Pin/port configurations
 int encoderA_pin   = 2;  // Digital pin #2, INT0
@@ -416,18 +416,19 @@ void loop()
 
   // --------------------------------------------------------------------------
   // wait and do something else!
-  while(micros()-lastLoop &lt; PID_LOOP_INTERVAL_US) {
+    while(micros()-lastLoop &lt; PID_LOOP_INTERVAL_US) {
     rx();
     tx();
 
     // Experiment routines
-    if (pid.Now() &lt; 5.0)
+    float now = pid.Now();
+    if (now &lt; 5.0)
       SV = 0.0;
-    else if ((pid.Now() &gt; 5.0) &amp;&amp; (pid.Now() &lt; 8.0)) 
+    else if ((now &gt; 5.0) &amp;&amp; (now &lt; 8.0)) 
       SV = 180.0;
-    else if (pid.Now() &gt; 8.0 &amp;&amp; (pid.Now() &lt; 11.0)) 
+    else if (now &gt; 8.0 &amp;&amp; (now &lt; 11.0)) 
       SV = -180.0;
-    else if (pid.Now() &gt; 11.0) 
+    else if (now &gt; 11.0) 
       SV = 0.0;
   }
   lastLoop = micros();
@@ -442,13 +443,13 @@ void A_CHANGE()
     pulses++; // moving forward
 }  
 </code></pre>
-<p>Since the quadrature encoder is processed by an external interrupt service, we found the readings to be more robust if we put the PID loop in the Arduino's <code>loop()</code> function rather than in a timer interrupt service.</p>
-<p>The next figure shows similar implementation in MATLAB Simulink with identical control parameters. The Simulink file can be downloaded <a href="n20_dc_motor_encoder_pid_uno.slx">here</a> (R2024b).  </p>
+<p>Since the quadrature encoder is serviced by an external interrupt handler, we found the readings to be more robust if we put the PID loop in the Arduino's <code>loop()</code> function instead of as a timer interrupt service.</p>
+<p>The next figure shows similar implementation in MATLAB Simulink with identical control parameters and sampling rate. The Simulink file can be downloaded <a href="n20_dc_motor_encoder_pid_uno.slx">here</a> (R2024b).  </p>
 <p><img alt="" src="im7.png" /></p>
 <p>Note that to read the quadrature encoder, we create our own Simulink block since the shipped quadrature encoder block only allows <script type="math/tex">\times4</script>-mode readings.  As for the custom quadrature encoder block, it allows  <script type="math/tex">\times1</script>-mode readings.</p>
 <p>Finally, the results are shown in the following plots.</p>
 <p><img alt="" src="im8.png" /></p>
-<p>As shown by the plots, YAPID gives results that is very close to MATLAB Simulink.</p>
+<p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
 <h3 id="heater-control">Heater control</h3>
 <h3 id="dc-motor-position-control-with-potentiometer">DC-motor position control (with potentiometer)</h3>
               
@@ -495,5 +496,5 @@ void A_CHANGE()
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-03-31 07:59:58.715312+00:00
+Build Date UTC : 2025-03-31 21:42:25.559534+00:00
 -->
