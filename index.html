@@ -40,7 +40,7 @@
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href=".">YAPID (Yet Another PID Library for Arduino)</a>
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">YAPID (Yet Another PID Library for Arduino)</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#about-yapid">About YAPID</a>
     </li>
@@ -54,11 +54,9 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#heater-control">Heater control</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#dc-motor-position-control-with-potentiometer">DC-motor position control (with potentiometer)</a>
-    </li>
         </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-the-low-pass-filter">Using the low-pass filter</a>
     </li>
     </ul>
                 </li>
@@ -119,7 +117,7 @@
 <p><img alt="" src="im2.png" /></p>
 <p>Mathematical details can be found in the following links:  </p>
 <ul>
-<li><a href="https://auralius.github.io/control-systems-with-sympy/digital-pid-1.html">Digital PID Control - Part 1</a>  </li>
+<li><a href="https://auralius.github.io/control-systems-with-sympy/digital-pid.html">Digital PID Control - Part 1</a>  </li>
 <li><a href="https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html">Digital PID Control - Part 2</a></li>
 <li><a href="https://auralius.github.io/control-systems-with-sympy/digital-filter.html">Digital Low-Pass Filter</a></li>
 </ul>
@@ -195,11 +193,13 @@ void setup()
   // ...
 }
 </code></pre>
-<p>Finally, in the timer interrupt function handler, we can put our PID control. The steps are: 
-* read the sensor (<code>pv</code>)
-* compute the PID (<code>co</code>)
-* apply the output to the actuator/plant
-* measure the elapsed time</p>
+<p>Finally, in the timer interrupt function handler, we can put our PID control. The steps are: </p>
+<ul>
+<li>read the sensor (<code>pv</code>)  </li>
+<li>compute the PID (<code>co</code>)  </li>
+<li>apply the output to the actuator/plant  </li>
+<li>measure the elapsed time  </li>
+</ul>
 <pre><code class="language-cpp">void Timer1Handler()
 { 
   float pv = (float)analogRead(A0) * 5.0 / 1024.0;
@@ -308,9 +308,10 @@ void loop()
 <img alt="" src="im4.png" /></p>
 <p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
 <h3 id="dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</h3>
-<p>The first picture below is the cheap N20 DC motor (<a href="https://tokopedia.link/EZlFg2RIbSb">purchase link</a>) that comes with a magnetic quadrature encoder that generate 7 pulses per rotation. As for the second picture below, it shows the overall system with an Arduino Uno and an <a href="https://www.arduino.cc/en/uploads/Main/arduino_MotorShield_Rev3-schematic.pdf">Arduino Motor Shield rev. 3</a>.</p>
-<p><img alt="150" src="im6.png" style="height:150px" />
-<img alt="300" src="im5.png" style="height:300px" /></p>
+<p>The first picture below is the cheap N20 DC motor (<a href="https://tokopedia.link/EZlFg2RIbSb">purchase link</a>) that comes with a magnetic quadrature encoder that generate 7 pulses per rotation. As for the second and third pictures below, they show the overall system with an Arduino Uno and an <a href="https://www.arduino.cc/en/uploads/Main/arduino_MotorShield_Rev3-schematic.pdf">Arduino Motor Shield rev. 3</a>.</p>
+<p><img alt="150" src="im6.png" style="height:180px" />
+<img alt="300" src="im5.png" style="width:180px" />
+<img alt="400" src="im9.png" style="height:220px" /></p>
 <p>The following code listing is the Arduino Uno's implementation where we set <script type="math/tex">K_p=10</script>, <script type="math/tex">K_i=4</script>, <script type="math/tex">K_d=0.01</script>, and <script type="math/tex">N=100</script>. The PID control is executed periodically (every 1000 us or 1kHz) in the Arduino's <code>loop()</code> function. </p>
 <pre><code class="language-cpp">/**
  * N20 DC-motor with rotary encoder. 
@@ -450,8 +451,105 @@ void A_CHANGE()
 <p>Finally, the results are shown in the following plots.</p>
 <p><img alt="" src="im8.png" /></p>
 <p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
-<h3 id="heater-control">Heater control</h3>
-<h3 id="dc-motor-position-control-with-potentiometer">DC-motor position control (with potentiometer)</h3>
+<h2 id="using-the-low-pass-filter">Using the low-pass filter</h2>
+<p>In order to use the filter, we can create a YAPID object by using the following code.</p>
+<pre><code class="language-cpp">float Ts = 0.001;
+YAPID pid(Ts);
+</code></pre>
+<p>After that, we can run the filter periodically by calling the filter function. For first order low-pass filter:</p>
+<pre><code class="language-cpp">// float signal = ....
+float filt_signal = pid1.FOLP(0.1, signal); // time-constant = 0.1 seconds
+</code></pre>
+<p>For second order low-pass filter:</p>
+<pre><code class="language-cpp">// float signal = ....
+float filt_signal = pid1.SOLP(10, signal); // cut-off frequency = 10Hz
+</code></pre>
+<p>The following code listing shows a complete program for using the low-pass filter in the previous RC-system.</p>
+<pre><code class="language-cpp">/**
+ * A simple serial RC system with R = 20kΩ and C = 100uF
+ * PWM signal from D3 (Timer-2) is applied to the RC system.
+ * Voltage across the capacitor is measured by A0.
+ */
+
+#define TIMER_INTERRUPT_DEBUG         0
+#define _TIMERINTERRUPT_LOGLEVEL_     0
+#define USE_TIMER_1                   true 
+
+#include &quot;TimerInterrupt.h&quot;
+#include &quot;yapid.h&quot;
+
+#define TIMER1_INTERVAL_MS             1
+
+const int pwm_port = 3;  // TIMER-2   
+
+// Create the PID controller
+float Ts = 1e-3;
+YAPID pid1(Ts); // for first-order filter demo
+YAPID pid2(Ts); // for second-order filter demo
+
+volatile float SV = 0.0;  // set value from 0 to 5 
+
+
+void setup() {
+  ITimer1.init();
+  ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, Timer1Handler);
+
+  pinMode(pwm_port, OUTPUT); 
+  analogWrite(pwm_port, 0);     
+
+  Serial.begin(250000);
+}
+
+
+void rx()
+{
+  while(Serial.available()){
+    int StringCount = 0;
+    String input = Serial.readString();
+    SV = input.toFloat();
+  }
+}
+
+
+inline void tx()
+{
+  Serial.print(pid1.Now(), 3);
+  Serial.print(&quot;,&quot;);
+
+  Serial.print(pid1.X());
+  Serial.print(&quot;,&quot;);
+
+  Serial.print(pid1.Y());
+  Serial.print(&quot;,&quot;);
+
+  Serial.print(pid2.Y());
+  Serial.print(&quot;\n&quot;);
+}
+
+void Timer1Handler()
+{ 
+  float pv = (float)analogRead(A0) * 5.0 / 1024.0;
+  float pv_filtered1 = pid1.FOLP(0.1, pv);
+  float pv_filtered2 = pid2.SOLP(10.0, pv);
+
+  // Generate a sinousoidal signal, f=0.5Hz, peak-to-peak values: 0 volt to 1 volt
+  float pwm_command = (sin(2*3.1415*0.5*pid1.Now()) + 1.0) / 5.0 * 255.0;
+  analogWrite(pwm_port, (int)pwm_command);
+
+  pid1.UpdateTime();
+}
+
+void loop()
+{
+  // Serial receive
+  rx();
+
+  // Serial transmit
+  tx();
+}
+
+</code></pre>
+<p><img alt="" src="im10.gif" /></p>
               
             </div>
           </div><footer>
@@ -495,6 +593,6 @@ void A_CHANGE()
 </html>
 
 <!--
-MkDocs version : 1.5.3
-Build Date UTC : 2025-03-31 21:42:25.559534+00:00
+MkDocs version : 1.6.1
+Build Date UTC : 2025-04-02 09:45:14.823893+00:00
 -->
