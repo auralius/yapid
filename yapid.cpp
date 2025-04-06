@@ -174,11 +174,7 @@ float YAPID::Compute2(float set_value, float process_value)
   sv = set_value;
   pv = process_value;
   
-  e1 = e0;
   e0 = -pv;
-  
-  I1 = I0;
-  D1 = D0;
   
   float I0_ = Ki * (e0 + e1) * Ts/2;
   P0 = Kp * e0;
@@ -198,6 +194,10 @@ float YAPID::Compute2(float set_value, float process_value)
   else
     sat_co = co;
     
+  e1 = e0;
+  I1 = I0;
+  D1 = D0;
+  
   return sign * sat_co;
 }
 

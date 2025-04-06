@@ -120,21 +120,21 @@ public:
   
   
 private:
-  float P0; //!< P(k) 
-  float I0; //!< I(k) 
-  float I1; //!< I(k-1)
-  float D0; //!< D(k) 
-  float D1; //!< D(k-1)
+  float P0 = 0.0; //!< P(k) 
+  float I0 = 0.0; //!< I(k) 
+  float I1 = 0.0; //!< I(k-1)
+  float D0 = 0.0; //!< D(k) 
+  float D1 = 0.0; //!< D(k-1)
   
-  float Kp; //!< P-gain
-  float Ki; //!< I-gain
-  float Kd; //!< D-gain
-  float N;  //!< Derivative filter coefficient
+  float Kp = 0.0; //!< P-gain
+  float Ki = 0.0; //!< I-gain
+  float Kd = 0.0; //!< D-gain
+  float N = 0.0;  //!< Derivative filter coefficient
 
-  float pv;     //!< process value
-  float sv;     //!< set value
-  float co;     //!< control output
-  float sat_co; //!< control output after the saturator
+  float pv = 0.0;     //!< process value
+  float sv = 0.0;     //!< set value
+  float co = 0.0;     //!< control output
+  float sat_co = 0.0; //!< control output after the saturator
   
   float sign = 1.0;    //!< for inverting the output if needed
   
@@ -151,9 +151,9 @@ private:
   float y1 = 0.0;       //!< y(k-1)
   float y2 = 0.0;       //!< y(k-2)
   
-  unsigned long tbase;       
-  unsigned long tnow;   //!< current time stamp in micro-seconds
-  unsigned long tprev;  //!< previous time stamp in micro-seconds
+  unsigned long tbase = 0;       
+  unsigned long tnow  = 0;   //!< current time stamp in micro-seconds
+  unsigned long tprev = 0;  //!< previous time stamp in micro-seconds
   
   float telapsed = 0.0; //!< elapsed time in micro-seconds
   float Ts       = 1.0; //!< sampling period in seconds
