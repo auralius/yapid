@@ -1,7 +1,7 @@
 {
   "name": "YAPID",
   "keywords": "PID, controller, signal",
-  "description": "YAPID is another PID library for Arduino. In YAPID, we focus on more accurate implementations through detailed discretization techniques and result comparisons against MATLAB Simulink.",
+  "description": "YAPID is another PID library for Arduino. YAPID focuses on more accurate implementations through detailed discretization techniques and result comparisons against MATLAB Simulink.",
   "url": "https://auralius.github.io/yapid/",
   "include":,
   "authors":
