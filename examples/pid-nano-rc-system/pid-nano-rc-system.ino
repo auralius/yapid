@@ -1,7 +1,10 @@
 /**
  * A simple serial RC system with R = 20kΩ and C = 100uF
- * PWM signal from D3 (Timer-2) is applied to the RC system.
- * Voltage across the capacitor is measured by A0.
+ * Thus, system transfer function is: 1/(2s + 1).
+ * PWM signal from D3 (Timer-2) is applied to the RC system (vi).
+ * Voltage across the capacitor (vc) is measured by A0.
+ *
+ * https://auralius.github.io/yapid/#rc-system
  */
  
 #define TIMER_INTERRUPT_DEBUG         0
@@ -27,6 +30,8 @@ volatile float SV = 0.0;  // set value
 
 
 void setup() {
+  Serial.begin(921600);
+
   ITimer1.init();
   ITimer1.attachInterruptInterval(TIMER1_INTERVAL_MS, Timer1Handler);
   
@@ -34,11 +39,15 @@ void setup() {
   analogWrite(pwm_port, 0);     
 
   pid.SetOutputLimits(0., 255.)  ;
-  Serial.begin(1000000);
+
+  // Wait till the capacitor discharges!
+  while(analogRead(A0) > 10){
+     delay(100);
+  }
 }
 
 
-void rx()
+inline void rx()
 {
   while(Serial.available()){
     int StringCount = 0;
@@ -73,6 +82,7 @@ void Timer1Handler()
   float pv = (float)analogRead(A0) * 5.0 / 1024.0;
 
   float co = pid.Compute1(SV, pv);
+  //float co = pid.Compute2(SV, pv);
   
   analogWrite(pwm_port, (int)co);
   
@@ -88,6 +98,7 @@ void loop()
   tx();
   
   /*
+  // Simple test scenario:
   if (pid.Now() < 15.0)
     SV = 0.0;
   else if ((pid.Now() > 15.0) && (pid.Now() < 30.0)) 
@@ -96,3 +107,4 @@ void loop()
     SV = 1.0;
   */
 }
+

@@ -131,7 +131,9 @@ private:
   float Kd = 0.0; //!< D-gain
   float N = 0.0;  //!< Derivative filter coefficient
 
-  float pv = 0.0;     //!< process value
+  float pv0 = 0.0;     //!< process value at k
+  float pv1 = 0.0;     //!< process value at k-1
+  
   float sv = 0.0;     //!< set value
   float co = 0.0;     //!< control output
   float sat_co = 0.0; //!< control output after the saturator
