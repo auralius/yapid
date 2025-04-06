@@ -111,7 +111,4 @@ void Timer1Handler()
 }
 ```
 
-## Comparison with MATLAB Simulink
-
-![](https://github.com/auralius/yapid/blob/main/compare_matlab.png)
 
