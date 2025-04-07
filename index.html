@@ -56,6 +56,8 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#derivative-kicks">Derivative kicks</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#using-the-low-pass-filter">Using the low-pass filter</a>
     </li>
     </ul>
@@ -308,7 +310,7 @@ void loop()
 <img alt="" src="im4.png" /></p>
 <p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
 <h3 id="dc-motor-control-with-quadrature-encoder">DC-motor control (with quadrature encoder)</h3>
-<p>The first picture below is the cheap N20 DC motor (<a href="https://tokopedia.link/EZlFg2RIbSb">purchase link</a>) that comes with a magnetic quadrature encoder that generate 7 pulses per rotation. As for the second and third pictures below, they show the overall system with an Arduino Uno and an <a href="https://www.arduino.cc/en/uploads/Main/arduino_MotorShield_Rev3-schematic.pdf">Arduino Motor Shield rev. 3</a>(<a href="https://tokopedia.link/fMce7BSQeSb">purchase link</a>).</p>
+<p>The first picture below is the cheap N20 DC motor (<a href="https://tokopedia.link/EZlFg2RIbSb">purchase link</a>) that comes with a magnetic quadrature encoder that generate 7 pulses per rotation. As for the second and third pictures below, they show the overall system with an Arduino Uno and an <a href="https://www.arduino.cc/en/uploads/Main/arduino_MotorShield_Rev3-schematic.pdf">Arduino Motor Shield rev. 3</a> (<a href="https://tokopedia.link/fMce7BSQeSb">purchase link</a>).</p>
 <p><img alt="150" src="im6.png" style="height:180px" />
 <img alt="300" src="im5.png" style="width:180px" />
 <img alt="400" src="im9.png" style="height:220px" /></p>
@@ -450,6 +452,13 @@ void A_CHANGE()
 <p>Finally, the results are shown in the following plots.</p>
 <p><img alt="" src="im8.png" /></p>
 <p>As shown by the plots, YAPID gives results that are very close to MATLAB Simulink.</p>
+<hr />
+<h2 id="derivative-kicks">Derivative kicks</h2>
+<p>Derivative control causes a spike in the control output when  set value changes abruptly. To eliminate this spike, the derivative term is computed from the process value instead of from the set value. See the figure below.</p>
+<p><img alt="" src="im11.png" /></p>
+<p>The implementation in YAPID can be found in <code>compute2()</code>. The several following plots show the derivative terms of <code>compute1()</code> and <code>compute2()</code>. As shown in the center plot, spikes occur every time the set values are changed abruptly. In the bottom plot,  there are no spikes since the derivative term now takes the smooth process value. Finally, the control process value by <code>compute2()</code> is smoother then by <code>compute1()</code>. The data was taken by using the same RC-system as in the earlier section.
+<img alt="" src="im12.png" /></p>
+<hr />
 <h2 id="using-the-low-pass-filter">Using the low-pass filter</h2>
 <p>In order to use the filter, we first create a YAPID object by using the following codes.</p>
 <pre><code class="language-cpp">float Ts = 0.001;
@@ -533,7 +542,9 @@ void loop()
   tx();
 }
 </code></pre>
+<p>The results are shown in the plot below: <em>value 2</em>: original signal, <em>value 3</em>: filtered signal with first order low-pass filter, <em>value 4</em>: filtered signal with second order low-pass filter.</p>
 <p><img alt="" src="im10.gif" /></p>
+<hr />
               
             </div>
           </div><footer>
@@ -578,5 +589,5 @@ void loop()
 
 <!--
 MkDocs version : 1.5.3
-Build Date UTC : 2025-04-02 12:30:41.811928+00:00
+Build Date UTC : 2025-04-07 08:47:47.993141+00:00
 -->
