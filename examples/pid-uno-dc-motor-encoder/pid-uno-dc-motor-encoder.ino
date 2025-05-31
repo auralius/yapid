@@ -68,21 +68,6 @@ inline void tx()
   Serial.print("\n");
 }
 
-void Timer1Handler()
-{ 
-  float pv =  (float)pulses / ppr * 360.; // in degs
-
-  float co = pid.Compute1(SV, pv);
-  analogWrite(pwm_port, (int)abs(co));
-
-  if (co > 0.0)
-    digitalWrite(dir_port, HIGH);
-  else
-    digitalWrite(dir_port, LOW);
-
-  pid.UpdateTime();
-}
-
 inline void runPID()
 {
   float pv =  (float)pulses / ppr * 360.; // in degs
