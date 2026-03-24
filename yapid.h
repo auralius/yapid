@@ -8,8 +8,11 @@
  
 #ifndef YAPID_h
 #define YAPID_h
-#define LIBRARY_VERSION 0.0.2
+#define LIBRARY_VERSION 0.0.4
 
+// ----------------------------------------------------------------------------
+// YAPID: Yet Another PID controller
+// ----------------------------------------------------------------------------
 class YAPID
 {
 public:
@@ -80,7 +83,7 @@ public:
   //! Get current D control output.
   float D();
    
-  //! Get current time (in micro-seconds).
+  //! Get current time (in seconds).
   float Now();
   
   //! Update the time once.
@@ -95,7 +98,7 @@ public:
   float Compute1(float set_value, float process_value);
   
   //! Run the PID once.
-  /*! D-term uses the prcess-value signal */
+  /*! D-term uses the process-value signal */
   float Compute2(float set_value, float process_value);
   
   /**
@@ -157,8 +160,9 @@ private:
   unsigned long tnow  = 0;   //!< current time stamp in micro-seconds
   unsigned long tprev = 0;  //!< previous time stamp in micro-seconds
   
-  float telapsed = 0.0; //!< elapsed time in micro-seconds
+  float telapsed = 0.0; //!< elapsed time in seconds
   float Ts       = 1.0; //!< sampling period in seconds
 };
+
 
 #endif

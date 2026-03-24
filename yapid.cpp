@@ -222,6 +222,9 @@ float YAPID::FOLP(float tau, float in)
   
 float YAPID::SOLP(float wc, float in)
 {
+  if (Ts <= 0.0f) return y0;
+  if (wc <= 0.0f) return in;
+
   x2 = x1;
   x1 = x0;
   x0 = in;
