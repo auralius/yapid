@@ -1,5 +1,3 @@
-# 📂 File Overview
-
 This example demonstrates a **state-space implementation of a PID controller with derivative filtering**, validated across:
 
 * Python simulation
@@ -8,45 +6,19 @@ This example demonstrates a **state-space implementation of a PID controller wit
 
 ---
 
-## 1. `PID-DERIVATIVE-FILTER-STATE-SPACE.pdf`
+__1. `PID-DERIVATIVE-FILTER-STATE-SPACE.pdf`__
 
-This document explains the ****mathematical foundation behind the implementation**.
-
-Contents include:
-
-* Derivation of PID with derivative filter
-* Conversion from transfer function to state-space
-* Interpretation of:
-
-  * integrator state
-  * derivative filter state
-* Final continuous-time state-space form
+This document explains the ****mathematical foundation behind the implementation**. The contents 
+include derivation the state-space form of a continuous-time PID with derivative filter
 
 ---
 
-## 2. `pid-ss-model-in-the-loop.ino`
+__2. `pid-ss-model-in-the-loop.ino`__
 
-Arduino implementation of the system.
+This is the Arduino implementation of the discrete PID on a discrete 2nd-order plant (all in 
+state-space format).
 
-What it does:
-
-* Implements **two `YAPID_SS` blocks**:
-
-  * PID controller (state-space)
-  * 2nd-order plant (state-space)
-* Runs a **closed-loop simulation on MCU**
-* Streams data over serial in CSV format
-
-Other features:
-
-* Command interface:
-
-  * `START` → begin simulation
-  * `STOP` → stop simulation
-  * `RESET` → reset states
-  * `PING` → health check
-* Fixed sampling time using `micros()`
-* Logs:
+The Arduino program logs:
 
   ```
   t,r,y,e,u,xc1,xc2,xp1,xp2
@@ -54,47 +26,21 @@ Other features:
 
 ---
 
-## 3. `serial-plot.py`
+__3. `serial-plot.py`__
 
-Python script for **real-time visualization and logging**.
+This is a Python script for **real-time visualization and logging**.
 
-What it does:
-
-* Connects to Arduino via serial
-* Sends `START` command
-* Receives streamed data
-* Logs to CSV file
-* Plots live:
-
-  * reference vs output (`r`, `y`)
-  * control signal (`u`)
 
 ---
 
-## 4. `simulation.py`
+__4. `simulation.py`__
 
-Pure Python simulation of the same system.
-
-What it does:
-
-* Simulates:
-
-  * PID (state-space)
-  * Plant (state-space)
-* Uses identical update order as Arduino
-* Generates:
-
-  * CSV logs
-  * plots for comparison
-
-Key purpose:
-
-* Provides a **reference baseline**
-* Used to verify Arduino implementation
+This is the pure Python simulation of the same system, which is used to verify Arduino 
+implementation.
 
 ---
 
-## 5. `yapid_utils.py`
+__5. `yapid_utils.py`__
 
 Utility functions for generating models.
 
