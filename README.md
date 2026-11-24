@@ -71,7 +71,7 @@ For odd orders (3 and 5), **also cascade one first-order section** with `tau = 1
 
 **Important:** Each cascaded section **must use a separate `YAPID` object**. The filter functions share each object's input/output history (`x0`, `x1`, `x2`, `y0`, `y1`, `y2`). Do not use one object for multiple simultaneous sections or independent filter channels.
 
-### Second-order low-pass (unchanged usage)
+### Second-order low-pass (default usage)
 
 ```cpp
 const float Ts = 0.01f;               // 100 Hz sample rate
