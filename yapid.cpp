@@ -13,6 +13,7 @@
 #endif
 
 #include <yapid.h>
+#include <string.h>
 
 YAPID::YAPID(float ts)
 {
@@ -220,27 +221,182 @@ float YAPID::FOLP(float tau, float in)
   return y0;
 }
   
-float YAPID::SOLP(float wc, float in)
+// Shared Butterworth section lookup is defined below, before SOHP().
+static bool LookupC(const char* id, float &c);
+
+float YAPID::SOLP(float wc, float in, const char* c)
 {
   if (Ts <= 0.0f) return y0;
   if (wc <= 0.0f) return in;
+
+  float cval;
+  if (!LookupC(c, cval)) return y0;  // Invalid section: state untouched.
+
+  // Tustin: s = (2/Ts)*(1 - z^-1)/(1 + z^-1).
+  // H(s) = wc^2 / (s^2 + c*wc*s + wc^2).
+  // With q = 2/(Ts*wc):
+  //    A  = 1 + c*q + q^2
+  //    b0 = 1/A, b1 = 2/A, b2 = 1/A
+  //    a1 = 2*(1-q^2)/A, a2 = (1-c*q+q^2)/A.
+  // y[k] = b0*x[k] + b1*x[k-1] + b2*x[k-2]
+  //      - a1*y[k-1] - a2*y[k-2].
+  float q  = 2.0f / (Ts * wc);
+  float q2 = q * q;
+  float A  = 1.0f + cval*q + q2;
+
+  float b0 = 1.0f / A;
+  float b1 = 2.0f / A;
+  float b2 = b0;
+  float a1 = 2.0f * (1.0f - q2) / A;
+  float a2 = (1.0f - cval*q + q2) / A;
 
   x2 = x1;
   x1 = x0;
   x0 = in;
   y2 = y1;
   y1 = y0;
-  
-  float sq22  = 2*sqrt(2);
-  float Tswc  = Ts * wc;
-  float Tswc2 = Tswc * Tswc;
-  float A = 1 + sq22/Tswc + 4/Tswc2;
-  float B = 2 - 8/Tswc2;  
-  float C = 1 - sq22/Tswc + 4/Tswc2;
 
-  y0 = (x0 + 2*x1 + x2 - y1*B - y2*C ) / A;
+  y0 = b0*x0 + b1*x1 + b2*x2 - a1*y1 - a2*y2;
   return y0;
- }
+}
+
+float YAPID::FOHP(float tau, float in)
+{
+  if (Ts <= 0.0f) return y0;
+  if (tau <= 0.0f) return 0.0f;
+
+  x1 = x0;
+  x0 = in;
+  y1 = y0;
+
+  // First-order high-pass filter:
+  //
+  //              tau*s
+  // H(s) = ----------------
+  //          tau*s + 1
+  //
+  // Using Tustin substitution:
+  //
+  //          2   1 - z^-1
+  // s  =  ----  --------
+  //          Ts  1 + z^-1
+  //
+  // The discrete-time equation is:
+  //
+  // y[k] = b0*x[k] + b1*x[k-1] - a1*y[k-1]
+  //
+  // where:
+  //
+  // alpha = 2*tau/Ts
+  // b0    =  alpha/(1 + alpha)
+  // b1    = -alpha/(1 + alpha)
+  // a1    = (1 - alpha)/(1 + alpha)
+
+  float alpha = 2.0f * tau / Ts;
+
+  float b0 =  alpha / (1.0f + alpha);
+  float b1 = -alpha / (1.0f + alpha);
+  float a1 = (1.0f - alpha) / (1.0f + alpha);
+
+  y0 = b0*x0 + b1*x1 - a1*y1;
+
+  return y0;
+}
+
+
+// Butterworth second-order sections: s^2 + c*wc*s + wc^2
+// c = 2*sin((2k-1)*pi/(2N)), k = 1..floor(N/2)
+// S1 is the first-order section (use FOHP with tau = 1/wc), so it is not listed.
+struct SectionC {
+  const char* id;
+  float c;
+};
+
+static const SectionC SECTION_TABLE[] = {
+  {"S2", 1.41421356f},  // N = 2
+  {"S3", 1.00000000f},  // N = 3
+  {"S4", 0.76536686f},  // N = 4, k = 1
+  {"S5", 1.84775907f},  // N = 4, k = 2
+  {"S6", 0.61803399f},  // N = 5, k = 1
+  {"S7", 1.61803399f}   // N = 5, k = 2
+};
+
+// Look up c from a section ID. Returns false if the ID is unknown.
+static bool LookupC(const char* id, float &c)
+{
+  if (id == 0) return false;
+
+  for (unsigned int i = 0; i < sizeof(SECTION_TABLE) / sizeof(SECTION_TABLE[0]); i++) {
+    if (strcmp(id, SECTION_TABLE[i].id) == 0) {
+      c = SECTION_TABLE[i].c;
+      return true;
+    }
+  }
+  return false;
+}
+
+float YAPID::SOHP(float wc, float in, const char* c)
+{
+  if (Ts <= 0.0f) return y0;
+  if (wc <= 0.0f) return in;
+
+  float cval;
+  if (!LookupC(c, cval)) return y0;  // unknown section ID: keep the state untouched
+
+  x2 = x1;
+  x1 = x0;
+  x0 = in;
+  y2 = y1;
+  y1 = y0;
+
+  // Second-order Butterworth high-pass filter section:
+  //
+  //                  s^2
+  // H(s) = -------------------------
+  //        s^2 + c*wc*s + wc^2
+  //
+  // wc must be supplied in rad/s. c comes from the section ID
+  // (c = sqrt(2) for the plain second-order Butterworth filter, "S2").
+  //
+  // Using Tustin substitution:
+  //
+  //          2   1 - z^-1
+  // s  =  ----  --------
+  //          Ts  1 + z^-1
+  //
+  // Define:
+  //
+  // q = 2/(Ts*wc)
+  //
+  // The discrete-time equation is:
+  //
+  // y[k] = b0*x[k] + b1*x[k-1] + b2*x[k-2]
+  //        - a1*y[k-1] - a2*y[k-2]
+  //
+  // where:
+  //
+  // A  = 1 + c*q + q^2
+  // b0 = q^2/A
+  // b1 = -2*q^2/A
+  // b2 = q^2/A
+  // a1 = 2*(1 - q^2)/A
+  // a2 = (1 - c*q + q^2)/A
+
+  float q  = 2.0f / (Ts * wc);
+  float q2 = q * q;
+
+  float A = 1.0f + cval*q + q2;
+
+  float b0 =  q2 / A;
+  float b1 = -2.0f * q2 / A;
+  float b2 =  q2 / A;
+  float a1 =  2.0f * (1.0f - q2) / A;
+  float a2 = (1.0f - cval*q + q2) / A;
+
+  y0 = b0*x0 + b1*x1 + b2*x2 - a1*y1 - a2*y2;
+
+  return y0;
+}
 
 float YAPID::X()
 {

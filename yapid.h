@@ -8,7 +8,10 @@
  
 #ifndef YAPID_h
 #define YAPID_h
-#define LIBRARY_VERSION 0.0.4
+#define LIBRARY_VERSION 0.0.6
+
+#include "yapid_rnn.h"
+#include "yapid_neural_ode.h"
 
 // ----------------------------------------------------------------------------
 // YAPID: Yet Another PID controller
@@ -109,11 +112,37 @@ public:
   float FOLP(float tau, float in);
   
   /**
-   * Second-order low-pass filter.
-   * @param wc Filter cut-off frequency
+   * Second-order Butterworth low-pass filter section using Tustin discretization.
+   * H(s) = wc^2 / (s^2 + c*wc*s + wc^2).
+   * @param wc Cut-off angular frequency in rad/s
    * @param in Input signal to filter
-   */  
-   float SOLP(float wc, float in);
+   * @param c Section ID: "S2" (default, plain second-order Butterworth),
+   *          "S3" (3rd order), "S4"/"S5" (4th order),
+   *          "S6"/"S7" (5th order).
+   *          Invalid IDs leave the state unchanged and return the last output.
+   *          Cascaded sections require separate YAPID instances.
+   */
+  float SOLP(float wc, float in, const char* c = "S2");
+
+
+  /**
+   * First-order high-pass filter using Tustin discretization.
+   * @param tau Filter time constant in seconds
+   * @param in Input signal to filter
+   */
+  float FOHP(float tau, float in);
+
+  /**
+   * Second-order Butterworth high-pass filter section using Tustin discretization.
+   * H(s) = s^2 / (s^2 + c*wc*s + wc^2), where c is selected by the section ID.
+   * @param wc Filter cut-off angular frequency in rad/s
+   * @param in Input signal to filter
+   * @param c  Section ID: "S2" (default, the plain 2nd-order Butterworth filter),
+   *           "S3" (3rd order), "S4"/"S5" (4th order), "S6"/"S7" (5th order).
+   *           An unknown ID leaves the filter state untouched and returns the
+   *           previous output. Each section needs its own YAPID object (state).
+   */
+  float SOHP(float wc, float in, const char* c = "S2");
   
   //! Return filter current input
   float X();
