@@ -10,7 +10,7 @@ https://auralius.github.io/yapid/
 
 YAPID provides discrete PID controllers and first- and second-order digital filters for Arduino. The implementations use the **bilinear transformation (Tustin or trapezoidal method)**. See the [digital PID derivation](https://auralius.github.io/control-systems-with-sympy/digital-pid-2.html) for the controller and the [digital filter derivation](https://auralius.github.io/control-systems-with-sympy/digital-filter.html) for filter design.
 
-The second-order low-pass (`SOLP`) and high-pass (`SOHP`) functions also support **cascaded Butterworth sections**, allowing higher-order filters without changing the basic YAPID interface.
+The second-order low-pass (`SOLP`) and high-pass (`SOHP`) functions also support **cascaded Butterworth sections**.
 
 ## Implemented functions
 
